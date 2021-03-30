@@ -28,6 +28,14 @@ enum custom_keycodes {
     SPD_3,
 };
 
+typedef enum {
+    GESTURE_NONE = 0,
+    GESTURE_DOWN_RIGHT,
+    GESTURE_DOWN_LEFT,
+    GESTURE_UP_LEFT,
+    GESTURE_UP_RIGHT,
+} gesture_id_t;
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = {{KC_BTN1, KC_BTN2, KC_BTN3, KC_BTN4, KC_BTN5, LCTL(KC_C), LCTL(KC_V), MO(1)}},
@@ -45,37 +53,37 @@ static bool    gesture_wait   = false;
 static uint8_t kc_no_to_kc_offset = 0;
 static uint8_t btn_release_flag = 0;
 
-uint8_t recognize_gesture(int16_t x, int16_t y) {
-    uint8_t gesture_id = 0;
+gesture_id_t recognize_gesture(int16_t x, int16_t y) {
+    gesture_id_t gesture_id = 0;
 
     if (abs(x) + abs(y) < GESTURE_MOVE_THRESHOLD) {
-        gesture_id = 0;
+        gesture_id = GESTURE_NONE;
     } else if (x >= 0 && y >= 0) {
-        gesture_id = 1;
+        gesture_id = GESTURE_DOWN_RIGHT;
     } else if (x < 0 && y >= 0) {
-        gesture_id = 2;
+        gesture_id = GESTURE_DOWN_LEFT;
     } else if (x < 0 && y < 0) {
-        gesture_id = 3;
+        gesture_id = GESTURE_UP_LEFT;
     } else if (x >= 0 && y < 0) {
-        gesture_id = 4;
+        gesture_id = GESTURE_UP_RIGHT;
     }
 
     return gesture_id;
 }
 
-void process_gesture(uint8_t gesture_id) {
+void process_gesture(gesture_id_t gesture_id) {
     switch (gesture_id) {
-        case 1:
-            tap_code(KC_PGUP);
+        case GESTURE_DOWN_RIGHT:
+            tap_code16(KC_PGUP);
             break;
-        case 2:
-            tap_code(KC_PGDN);
+        case GESTURE_DOWN_LEFT:
+            tap_code16(KC_PGDN);
             break;
-        case 3:
-            tap_code(KC_HOME);
+        case GESTURE_UP_LEFT:
+            tap_code16(KC_HOME);
             break;
-        case 4:
-            tap_code(KC_END);
+        case GESTURE_UP_RIGHT:
+            tap_code16(KC_END);
             break;
         default:
             break;
@@ -169,8 +177,8 @@ void post_process_record_user(uint16_t keycode, keyrecord_t* record) {
         gesture_move_x = 0;
         gesture_move_y = 0;
     } else if (gesture_wait == true && layer_state_is(0)) {
-        gesture_wait       = false;
-        uint8_t gesture_id = recognize_gesture(gesture_move_x, gesture_move_y);
+        gesture_wait            = false;
+        gesture_id_t gesture_id = recognize_gesture(gesture_move_x, gesture_move_y);
         process_gesture(gesture_id);
         dprintf("id:%d x:%d,y:%d\n", gesture_id, gesture_move_x, gesture_move_y);
     }
