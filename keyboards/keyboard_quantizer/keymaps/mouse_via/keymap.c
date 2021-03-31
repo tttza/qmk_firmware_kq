@@ -40,7 +40,6 @@ typedef enum {
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = {{KC_BTN1, KC_BTN2, KC_BTN3, KC_BTN4, KC_BTN5, LCTL(KC_C), LCTL(KC_V), MO(1)}, {KC_NO}},
-    [1] = {{KC_ENT, KC_BSPC, SPD_3, LCTL(KC_Z), LCTL(KC_Y), SPD_1, SPD_2, _______}, {KC_PGUP, KC_PGDN, KC_HOME, KC_END}},
 };
 // clang-format on
 
@@ -137,10 +136,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     return true;
 }
 
+// Override to avoid messy initial keymap show on VIA
+// Patch to dynamic_keymap.c is required
+void dynamic_keymap_reset(void) {
+    for (int layer = 0; layer < DYNAMIC_KEYMAP_LAYER_COUNT; layer++) {
+        for (int row = 0; row < MATRIX_ROWS; row++) {
+            for (int col = 0; col < MATRIX_COLS; col++) {
+                dynamic_keymap_set_keycode(layer, row, col, pgm_read_word(&keymaps[0][row][col]));
+            }
+        }
+    }
+}
+
 // override keymap_key_to_keycode
 uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
-    uint16_t keycode = pgm_read_word(&keymaps[(layer)][(key.row)][(key.col)]);
+    uint16_t keycode = KC_NO;
+    // uint16_t keycode = pgm_read_word(&keymaps[(layer)][(key.row)][(key.col)]);
+    if (layer < DYNAMIC_KEYMAP_LAYER_COUNT && key.row < MATRIX_ROWS && key.col < MATRIX_COLS) {
+        keycode = dynamic_keymap_get_keycode(layer, key.row, key.col);
+    }
 
+    // To use LT with mouse button, replace keycode and save offset
     if (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX) {
         uint8_t kc = keycode & 0xFF;
         if (kc >= KC_BTN1 && kc <= KC_BTN5) {
