@@ -6,3 +6,6 @@
 
 #define MATRIX_ROWS 1
 #define MATRIX_COLS 8
+
+// For gesture recognition trick
+#define TAPPING_TERM_PER_KEY

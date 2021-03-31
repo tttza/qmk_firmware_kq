@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "quantum.h"
 #include QMK_KEYBOARD_H
 
 #include "pointing_device.h"
@@ -45,13 +46,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 extern bool mouse_send_flag;
 
-static uint8_t spd_rate_num   = 1;
-static uint8_t spd_rate_den   = 1;
-static int16_t gesture_move_x = 0;
-static int16_t gesture_move_y = 0;
-static bool    gesture_wait   = false;
+static uint8_t spd_rate_num       = 1;
+static uint8_t spd_rate_den       = 1;
+static int16_t gesture_move_x     = 0;
+static int16_t gesture_move_y     = 0;
+static bool    gesture_wait       = false;
 static uint8_t kc_no_to_kc_offset = 0;
-static uint8_t btn_release_flag = 0;
+static uint8_t btn_release_flag   = 0;
 
 gesture_id_t recognize_gesture(int16_t x, int16_t y) {
     gesture_id_t gesture_id = 0;
@@ -161,8 +162,7 @@ uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
 }
 
 void matrix_scan_user(void) {
-    if (btn_release_flag)
-    {
+    if (btn_release_flag) {
         report_mouse_t mouse = pointing_device_get_report();
         mouse.buttons &= ~btn_release_flag;
         btn_release_flag = 0;
@@ -171,16 +171,40 @@ void matrix_scan_user(void) {
     }
 }
 
+// Start gesture recognition
+static void gesture_start(void) {
+    dprint("Gesture start\n");
+    gesture_wait   = true;
+    gesture_move_x = 0;
+    gesture_move_y = 0;
+}
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t* record) {
+    // Gesture recognition trick
+    // Start gesture when LT key is pressed
+    if (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX) {
+        if (record->event.pressed && gesture_wait == false) {
+            gesture_start();
+        }
+    }
+
+    return TAPPING_TERM;
+}
+
 void post_process_record_user(uint16_t keycode, keyrecord_t* record) {
-    if (layer_state_is(1) && gesture_wait == false) {
-        gesture_wait   = true;
-        gesture_move_x = 0;
-        gesture_move_y = 0;
-    } else if (gesture_wait == true && layer_state_is(0)) {
-        gesture_wait            = false;
-        gesture_id_t gesture_id = recognize_gesture(gesture_move_x, gesture_move_y);
-        process_gesture(gesture_id);
-        dprintf("id:%d x:%d,y:%d\n", gesture_id, gesture_move_x, gesture_move_y);
+    if (keycode >= QK_MOMENTARY && keycode <= QK_MOMENTARY_MAX) {
+        if (record->event.pressed && gesture_wait == false) {
+            gesture_start();
+        }
+    }
+
+    if ((keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX) || (keycode >= QK_MOMENTARY && keycode <= QK_MOMENTARY_MAX)) {
+        if ((!record->event.pressed) && gesture_wait == true) {
+            gesture_wait            = false;
+            gesture_id_t gesture_id = recognize_gesture(gesture_move_x, gesture_move_y);
+            process_gesture(gesture_id);
+            dprintf("id:%d x:%d,y:%d\n", gesture_id, gesture_move_x, gesture_move_y);
+        }
     }
 }
 
