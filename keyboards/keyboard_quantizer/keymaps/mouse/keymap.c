@@ -39,8 +39,8 @@ typedef enum {
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = {{KC_BTN1, KC_BTN2, KC_BTN3, KC_BTN4, KC_BTN5, LCTL(KC_C), LCTL(KC_V), MO(1)}},
-    [1] = {{KC_ENT, KC_BSPC, SPD_3, LCTL(KC_Z), LCTL(KC_Y), SPD_1, SPD_2, _______}},
+    [0] = {{KC_BTN1, KC_BTN2, KC_BTN3, KC_BTN4, KC_BTN5, LCTL(KC_C), LCTL(KC_V), MO(1)}, {KC_NO}},
+    [1] = {{KC_ENT, KC_BSPC, SPD_3, LCTL(KC_Z), LCTL(KC_Y), SPD_1, SPD_2, _______}, {KC_PGUP, KC_PGDN, KC_HOME, KC_END}},
 };
 // clang-format on
 
@@ -72,20 +72,13 @@ gesture_id_t recognize_gesture(int16_t x, int16_t y) {
     return gesture_id;
 }
 
-void process_gesture(gesture_id_t gesture_id) {
+void process_gesture(uint8_t layer, gesture_id_t gesture_id) {
     switch (gesture_id) {
-        case GESTURE_DOWN_RIGHT:
-            tap_code16(KC_PGUP);
-            break;
-        case GESTURE_DOWN_LEFT:
-            tap_code16(KC_PGDN);
-            break;
-        case GESTURE_UP_LEFT:
-            tap_code16(KC_HOME);
-            break;
-        case GESTURE_UP_RIGHT:
-            tap_code16(KC_END);
-            break;
+        case GESTURE_DOWN_RIGHT ... GESTURE_UP_RIGHT: {
+            keypos_t keypos  = {.row = 1, .col = gesture_id - 1};
+            uint16_t keycode = keymap_key_to_keycode(layer, keypos);
+            tap_code16(keycode);
+        } break;
         default:
             break;
     }
@@ -202,7 +195,15 @@ void post_process_record_user(uint16_t keycode, keyrecord_t* record) {
         if ((!record->event.pressed) && gesture_wait == true) {
             gesture_wait            = false;
             gesture_id_t gesture_id = recognize_gesture(gesture_move_x, gesture_move_y);
-            process_gesture(gesture_id);
+
+            uint8_t layer = 0;
+            if ((keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX)) {
+                layer = (keycode >> 8) & 0x0F;
+            } else {
+                layer = keycode & 0xFF;
+            }
+
+            process_gesture(layer, gesture_id);
             dprintf("id:%d x:%d,y:%d\n", gesture_id, gesture_move_x, gesture_move_y);
         }
     }
