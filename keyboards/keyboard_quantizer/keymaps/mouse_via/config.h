@@ -23,4 +23,4 @@
 #undef PRODUCT
 #define PRODUCT mouse_quantizer
 
-#define USB_POLLING_INTERVAL_MS 1
+#define USB_MOUSE_POLLING_INTERVAL_MS 1

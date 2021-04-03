@@ -318,6 +318,10 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor = {
 #    define USB_POLLING_INTERVAL_MS 10
 #endif
 
+#ifndef USB_MOUSE_POLLING_INTERVAL_MS
+#    define USB_MOUSE_POLLING_INTERVAL_MS USB_POLLING_INTERVAL_MS
+#endif
+
 /*
  * Configuration descriptors
  */
@@ -460,7 +464,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor = {
         .EndpointAddress        = (ENDPOINT_DIR_IN | MOUSE_IN_EPNUM),
         .Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
         .EndpointSize           = MOUSE_EPSIZE,
-        .PollingIntervalMS      = USB_POLLING_INTERVAL_MS
+        .PollingIntervalMS      = USB_MOUSE_POLLING_INTERVAL_MS
     },
 #endif
 
@@ -505,7 +509,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor = {
         .EndpointAddress        = (ENDPOINT_DIR_IN | SHARED_IN_EPNUM),
         .Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
         .EndpointSize           = SHARED_EPSIZE,
-        .PollingIntervalMS      = USB_POLLING_INTERVAL_MS
+        .PollingIntervalMS      = USB_MOUSE_POLLING_INTERVAL_MS
     },
 #endif
 

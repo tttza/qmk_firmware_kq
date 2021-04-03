@@ -11,4 +11,4 @@
 // For gesture recognition trick
 #define TAPPING_TERM_PER_KEY
 
-#define USB_POLLING_INTERVAL_MS 1
+#define USB_MOUSE_POLLING_INTERVAL_MS 1
