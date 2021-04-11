@@ -29,6 +29,10 @@
 #    define QUANTIZER_REPORT_PARSER REPORT_PARSER_DEFAULT
 #endif
 
+#ifndef TAP_CODE_DELAY
+#    define TAP_CODE_DELAY 0
+#endif
+
 // #define NO_PRINT
 
 bool ch559_update_mode = false;
@@ -258,8 +262,17 @@ void vendor_report_parser(uint16_t usage_id, hid_report_member_t const *member, 
     }
 }
 
-void system_report_hook(uint16_t report) { dprintf("System report %d\n", report); }
-void consumer_report_hook(uint16_t report) { dprintf("Consumer report %d\n", report); }
+void system_report_hook(uint16_t report) {
+    host_system_send(report);
+    wait_ms(TAP_CODE_DELAY);
+    host_system_send(0);
+}
+
+void consumer_report_hook(uint16_t report) {
+    host_consumer_send(report);
+    wait_ms(TAP_CODE_DELAY);
+    host_consumer_send(0);
+}
 
 bool process_packet(matrix_row_t current_matrix[]) {
     bool matrix_has_changed = false;
