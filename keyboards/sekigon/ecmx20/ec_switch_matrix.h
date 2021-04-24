@@ -35,3 +35,8 @@ int      ecsm_init(ecsm_config_t const* const ecsm_config);
 void     ecsm_get_config(ecsm_config_t* ecsm_config);
 bool     ecsm_matrix_scan(matrix_row_t current_matrix[]);
 void     ecsm_dprint_matrix(void);
+
+#ifdef ECS_VELOCITY_ENABLED
+int16_t ecsm_get_velocity(uint8_t row, uint8_t col);
+void    ecsm_dprint_velocity(void);
+#endif

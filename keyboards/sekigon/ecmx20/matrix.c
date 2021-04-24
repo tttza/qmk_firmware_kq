@@ -61,13 +61,6 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
         }
     }
 
-    static int cnt = 0;
-    if (cnt++ == 30) {
-        cnt = 0;
-        ecsm_dprint_matrix();
-        // dprintf("\n");
-    }
-
     return updated;
 }
 

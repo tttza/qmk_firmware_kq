@@ -29,11 +29,12 @@ void encoder_update_user(uint8_t index, bool clockwise) {
 }
 
 void matrix_scan_user(void) {
-    static int cnt = 0;
-    if (cnt++ == 30) {
-        cnt = 0;
-        ecsm_dprint_matrix();
-    }
+    dprintf("%d\n", ecsm_get_velocity(0, 0));
+    // static int cnt = 0;
+    // if (cnt++ == 30) {
+    //     cnt = 0;
+    //     ecsm_dprint_velocity();
+    // }
 }
 
 #include "rgblight.h"

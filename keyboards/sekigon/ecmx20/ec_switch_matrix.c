@@ -40,6 +40,10 @@ _Static_assert(sizeof(mux_sel_pins) == 3, "invalid MUX_SEL_PINS");
 static ecsm_config_t config;
 static uint16_t      ecsm_sw_value[MATRIX_ROWS][MATRIX_COLS];
 
+#ifdef ECS_VELOCITY_ENABLED
+static int16_t velocity[MATRIX_ROWS][MATRIX_COLS];
+#endif
+
 static inline void discharge_capacitor(void) { setPinOutput(DISCHARGE_PIN); }
 static inline void charge_capacitor(uint8_t row) {
     setPinInput(DISCHARGE_PIN);
@@ -145,12 +149,40 @@ static bool ecsm_update_key(matrix_row_t* current_row, uint8_t col, uint16_t sw_
 bool ecsm_matrix_scan(matrix_row_t current_matrix[]) {
     bool updated = false;
 
+#ifdef ECS_VELOCITY_ENABLED
+    static uint16_t prev_time = 0;
+    static bool     first     = true;
+
+    uint16_t dt = timer_elapsed(prev_time);
+    while (dt == 0) {
+        dt = timer_elapsed(prev_time);
+    }
+#endif
+
     for (int col = 0; col < sizeof(col_channels); col++) {
         for (int row = 0; row < sizeof(row_pins); row++) {
+#ifdef ECS_VELOCITY_ENABLED
+            uint16_t current = ecsm_readkey_raw(row, col);
+
+            if (!first) {
+                int32_t current_velocity = ((int32_t)current - ecsm_sw_value[row][col]) * 100 / dt;
+                const uint8_t filt = 8;
+                velocity[row][col]       = (filt * (int32_t)velocity[row][col] + (10 - filt) * current_velocity) / 10;
+            } else {
+                first = false;
+            }
+
+            ecsm_sw_value[row][col] = current;
+#else
             ecsm_sw_value[row][col] = ecsm_readkey_raw(row, col);
+#endif
             updated |= ecsm_update_key(&current_matrix[row], col, ecsm_sw_value[row][col]);
         }
     }
+
+#ifdef ECS_VELOCITY_ENABLED
+    prev_time = timer_read();
+#endif
 
     return updated;
 }
@@ -169,3 +201,19 @@ void ecsm_dprint_matrix(void) {
     dprintf("\n");
     // dprintf("%d,%d,%d,%d,%d\n", ecsm_sw_value[0][0], ecsm_sw_value[0][1], ecsm_sw_value[0][2], ecsm_sw_value[0][3],ecsm_sw_value[1][1]);
 }
+
+#ifdef ECS_VELOCITY_ENABLED
+int16_t        ecsm_get_velocity(uint8_t row, uint8_t col) { return velocity[row][col]; }
+void           ecsm_dprint_velocity(void) {
+    for (int row = 0; row < sizeof(row_pins); row++) {
+        for (int col = 0; col < sizeof(col_channels); col++) {
+            dprintf("%4d", velocity[row][col]);
+            if (col < sizeof(col_channels) - 1) {
+                dprintf(",");
+            }
+        }
+        dprintf("\n");
+    }
+    dprintf("\n");
+}
+#endif
