@@ -66,7 +66,7 @@ void send_reset_cmd(void);
  * represents the switch matrix.
  */
 #define LAYOUT(\
-esc, f1, f2, f3, f4,     f5, f6, f7, f8,     f9, f10, f11, f12,           pscr, scrl, pause, \
+esc, f1, f2, f3, f4,     f5, f6, f7, f8,     f9, f10, f11, f12,           pscr, scrl, pause, wstop, wref, \
 hanzen, k1, k2, k3, k4, k5, k6, k7, k8, k9, k0, min, circ, yen, bspc,     ins, home, pageup,       numlock, kp_slsh, kp_astr, kp_min, \
 tab,     q,  w,  e,  r,  t,  y,  u,  i,  o,  p,  at, lbrc,     ent,       del, end, pagedown,      kp7, kp8, kp9, kp_plus, \
 caps,    a,  s,  d,  f,  g,  h,  j,  k,  l,  scln, cln, rbrc,                                      kp4, kp5, kp6, \
@@ -93,6 +93,6 @@ lctrl, lgui, lalt, mhen, spc, henk, kana, ralt, rgui, app, rctrl,        left, d
     { kana, yen, henk, mhen, KC_INT6, KC_INT7, KC_INT8, KC_INT9} , \
     { KC_LANG1, KC_LANG2, KC_LANG3, KC_LANG4, KC_LANG5, KC_LANG6, KC_LANG7, KC_LANG8} ,\
     { KC_LANG9, KC_ALT_ERASE, KC_SYSREQ, KC_CANCEL, KC_CLEAR, KC_PRIOR, KC_RETURN, KC_SEPARATOR} , \
-    { KC_OUT,  KC_OPER, KC_CLEAR_AGAIN, KC_CRSEL, KC_EXSEL, KC_NO, KC_NO, KC_NO} ,\
+    { KC_OUT,  KC_OPER, KC_CLEAR_AGAIN, KC_CRSEL, KC_EXSEL, KC_WREF, KC_WREF, KC_NO} ,\
     { lctrl, lsft, lalt, lgui, rctrl, rsft, ralt, rgui } \
 }

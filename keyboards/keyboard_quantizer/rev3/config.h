@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // to print through virtser
-#undef NO_DEBUG
-#undef NO_PRINT
+// #undef NO_DEBUG
+// #undef NO_PRINT
 
 #define DEBUG_MATRIX_SCAN_RATE
