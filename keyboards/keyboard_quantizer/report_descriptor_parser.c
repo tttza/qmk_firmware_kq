@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <string.h> // memset
 
-#define NO_PRINT
+// #define NO_PRINT
 
 #include "debug.h"
 #include "print.h"

@@ -17,6 +17,8 @@
 #include "keymap_jp.h"
 #include "dynamic_keymap.h"
 
+// util/docker_build.sh keyboard_quantizer:via_noled
+
 // clang-format off
 // Set empty to reduce firm size
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = { };
@@ -70,7 +72,7 @@ void dynamic_keymap_reset(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   if (!record->event.pressed) return true;
-
+  if (IS_LAYER_ON(2)) return true;
 
   uint16_t skeycode; // シフトビットを反映したキーコード
   bool lshifted = keyboard_report->mods & MOD_BIT(KC_LSFT); // シフトキーの状態
@@ -85,7 +87,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   } else {
     skeycode = keycode;
   }
+
+#ifdef CONSOLE_ENABLE
   uprintf("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif
 
   // CTRL+SHIFT+F1を無変換、CTRL+SHIFT+F7を変換に割り当て
   if (ctrled & shifted) {
@@ -103,8 +108,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
   }
 
-#ifdef CONSOLE_ENABLE
-#endif
+
 
   for (int i = 0; i < sizeof(us2jis) / sizeof(us2jis[0]); i++) {
     if (us2jis[i][0] == skeycode) {
