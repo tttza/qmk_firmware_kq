@@ -72,7 +72,7 @@ void dynamic_keymap_reset(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   if (!record->event.pressed) return true;
-  if (IS_LAYER_ON(2)) return true;
+  if (IS_LAYER_ON(3) || IS_LAYER_ON(4) || IS_LAYER_ON(5)) return true;
 
   uint16_t skeycode; // シフトビットを反映したキーコード
   bool lshifted = keyboard_report->mods & MOD_BIT(KC_LSFT); // シフトキーの状態
